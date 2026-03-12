@@ -94,9 +94,18 @@ function MainApp() {
   let productosMostrar = productos.filter(p => p.categoria === activeCategory && (activeSubCategory === 'Todo' || p.subcategoria === activeSubCategory));
 
   return (
-    // SE AGREGA TIMES NEW ROMAN GLOBALMENTE AQUI
     <div className="bg-black text-white min-h-screen flex flex-col relative w-full overflow-x-hidden overflow-y-auto font-['Times_New_Roman',_Times,_serif]">
       
+      {/* EL ESTILO QUE ELIMINÉ POR ERROR ESTÁ DE VUELTA (Oculta la barra de scroll) */}
+      <style>{`
+        ::-webkit-scrollbar { display: none; }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        .auth-wrapper input, .auth-wrapper select { background-color: transparent !important; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      `}</style>
+
       <div className="screen-only flex flex-col flex-grow w-full">
         <header className="w-full h-auto flex flex-col items-center bg-cover bg-center mt-0 relative z-[100] pt-3 px-4 sm:px-6 md:px-8" style={{ backgroundImage: `url(${FONDO_HEADER_URL})` }}>
           
@@ -132,7 +141,6 @@ function MainApp() {
 
           {user && activeView === 'home' && (
             <nav className="w-full mt-4 mb-2 relative z-[100] px-2 md:px-6 pt-0 animate-fade-in">
-              {/* MENU PRINCIPAL EN 13 PUNTOS */}
               <ul className="flex flex-wrap justify-center gap-y-4 gap-x-4 sm:gap-x-8 md:gap-x-16 py-2 text-[13px] tracking-[0.2em] uppercase border-none bg-transparent">
                 {Object.keys(estructuraCatalogo).map(menu => {
                   const isMenuHidden = hiddenItems.includes(menu);
@@ -149,7 +157,6 @@ function MainApp() {
                             const isSubHidden = hiddenItems.includes(sub);
                             if (userRole !== 'admin' && isSubHidden) return null;
                             return (
-                              // SUBOPCIONES EN 12 PUNTOS
                               <div key={sub} onClick={(e) => { e.stopPropagation(); setMenuAbierto(null); irACategoria(sub); }} className={`cursor-pointer block mt-3 first:mt-0 text-[12px] transition-colors py-2 ${isSubHidden ? 'text-red-500' : 'text-gray-400 hover:text-white'}`}>
                                 {sub}
                               </div>
@@ -213,6 +220,7 @@ function MainApp() {
             <section className="container mx-auto py-8 md:py-16 flex-grow animate-fade-in w-full max-w-7xl">
                <h2 className="text-[13px] tracking-[0.3em] uppercase text-white mb-8 md:mb-12 text-center border-b border-white/10 pb-4 md:pb-6 break-words">{activeCategory}</h2>
                
+               {/* CUADRÍCULA: 4 columnas en PC, SIN gap (espacios), y con borde superior e izquierdo */}
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 w-full border-t border-l border-white/20">
                  {productosMostrar.map(producto => (
                     <ProductCard 
@@ -223,7 +231,7 @@ function MainApp() {
                     />
                  ))}
                  {productosMostrar.length === 0 && (
-                    <p className="text-gray-500 tracking-[0.2em] uppercase text-[10px] col-span-full text-center py-10 w-full">No hay piezas en esta categoría aún.</p>
+                    <p className="text-gray-500 tracking-[0.2em] uppercase text-[10px] col-span-full text-center py-10 w-full border-r border-b border-white/20">No hay piezas en esta categoría aún.</p>
                  )}
                </div>
             </section>

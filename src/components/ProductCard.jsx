@@ -27,11 +27,11 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
   const tallasDisponibles = ['6', '7', '8', '9', '10', '11', '12'];
 
   return (
-    // Bordes a la derecha y abajo para formar la cuadrícula con el gap-0 de App.tsx
+    // Borde a la derecha y abajo para formar la cuadrícula. 
     <div className="group relative bg-transparent flex flex-col p-6 w-full border-r border-b border-white/20 font-['Times_New_Roman',_Times,_serif]">
       
-      {/* Estrella en la intersección (fondo negro para tapar el cruce de líneas) */}
-      <span className="absolute -bottom-[9px] -right-[9px] text-[16px] text-white/50 leading-none z-10 bg-black px-[2px]">✦</span>
+      {/* LA ESTRELLA ✦ (Posicionada exactamente en la intersección de las líneas) */}
+      <span className="absolute -bottom-[10px] -right-[7px] text-[16px] text-white z-50 leading-none bg-black px-1">✦</span>
 
       <div 
         className={`overflow-hidden aspect-square relative w-full mb-6 flex items-center justify-center ${userRole === 'cliente' ? 'cursor-pointer' : ''}`} 
@@ -48,7 +48,6 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
       </div>
       
       <div className="flex flex-col flex-grow items-center text-center w-full">
-        {/* TITULO EN 13 PUNTOS */}
         <h4 className="text-[13px] tracking-[0.2em] uppercase text-white mb-2">{producto.titulo}</h4>
         <span className="text-[13px] tracking-[0.1em] text-white font-light mb-6">${producto.precio} USD</span>
         
@@ -64,7 +63,6 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
                   <button 
                     type="button"
                     onClick={(e) => { if (isAvailable) handleSelectTalla(e, talla); }}
-                    // TALLAS A 12 PUNTOS CON 2PX DE PADDING ALREDEDOR
                     className={`min-w-[24px] h-[24px] flex items-center justify-center p-[2px] text-[12px] tracking-[0.1em] transition-all duration-300 border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-white/30 hover:border-white') : 'border-red-500/30 text-red-500 cursor-not-allowed opacity-50'}`}
                   >
                     {talla}
@@ -78,14 +76,14 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           </div>
         )}
         
-        {/* DESCRIPCION EN 12 PUNTOS Y BLANCO PURO */}
-        <p className="text-[12px] text-[#ffffff] line-clamp-2 leading-relaxed mb-6 uppercase w-full opacity-100">
+        {/* DESCRIPCIÓN: Forzada a blanco puro con style para que NADA la ponga gris */}
+        <p style={{ color: 'white' }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
           {producto.descripcion}
         </p>
 
         {userRole === 'cliente' && !producto.vendido && (
             <div className="flex gap-2 mt-auto w-full justify-center z-30">
-               <button onClick={onComprar} className={`w-full py-2 text-[10px] tracking-[0.2em] font-bold uppercase transition-colors border ${canBuy ? 'bg-white text-black border-white hover:bg-gray-300' : 'bg-transparent text-gray-500 border-gray-600 cursor-not-allowed'}`}>
+               <button onClick={onComprar} className={`w-full py-2 text-[10px] tracking-[0.2em] font-bold uppercase transition-colors border outline-none ${canBuy ? 'bg-transparent text-white border-white hover:bg-white hover:text-black' : 'bg-transparent text-gray-500 border-gray-600 cursor-not-allowed'}`}>
                  {canBuy ? 'COMPRAR' : 'ELIJA TALLA'}
                </button>
             </div>
