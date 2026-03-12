@@ -3,14 +3,10 @@ import { supabase } from './services/supabase';
 import { CartProvider, useCart } from './contexts/CartContext';
 import ProductCard from './components/ProductCard';
 import Auth from './components/Auth';
-// Si ya separaste el Admin o el PretAPorter, impórtalos aquí:
-// import AdminDashboard from './components/AdminDashboard';
-// import PretAPorter from './components/PretAPorter';
 
 const LOGO_URL = "https://ifdvcxlbikqhmdnuxmuy.supabase.co/storage/v1/object/public/assets/aa.png"; 
 const FONDO_HEADER_URL = "/fondo-header.png"; 
 
-// Este es el catálogo original para que funcionen tus menús
 const estructuraCatalogo = {
   'Atelier': ['Joyería Exclusiva', 'Prêt-à-Porter'],
   'Joyería': ['Acero Fino', 'Plata de Ley 925', 'Gemas y Piedras Naturales'],
@@ -33,7 +29,6 @@ function MainApp() {
   const [userMenuAbierto, setUserMenuAbierto] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
-  // Traemos el estado del carrito desde tu nuevo Contexto
   const { carrito, cartPulse } = useCart();
 
   const cristalOpacoSubmenuClass = "flex flex-col bg-white/5 backdrop-blur-md py-6 px-8 shadow-none border-none"; 
@@ -99,9 +94,9 @@ function MainApp() {
   let productosMostrar = productos.filter(p => p.categoria === activeCategory && (activeSubCategory === 'Todo' || p.subcategoria === activeSubCategory));
 
   return (
-    <div className="bg-black text-white min-h-screen font-serif flex flex-col relative w-full overflow-x-hidden overflow-y-auto">
+    // SE AGREGA TIMES NEW ROMAN GLOBALMENTE AQUI
+    <div className="bg-black text-white min-h-screen flex flex-col relative w-full overflow-x-hidden overflow-y-auto font-['Times_New_Roman',_Times,_serif]">
       
-      {/* HEADER VISUAL RESTAURADO */}
       <div className="screen-only flex flex-col flex-grow w-full">
         <header className="w-full h-auto flex flex-col items-center bg-cover bg-center mt-0 relative z-[100] pt-3 px-4 sm:px-6 md:px-8" style={{ backgroundImage: `url(${FONDO_HEADER_URL})` }}>
           
@@ -113,7 +108,6 @@ function MainApp() {
 
           {user && (
             <div className="absolute top-6 right-4 md:right-12 flex items-center gap-4 md:gap-6 z-[100]">
-              {/* ICONO DEL CARRITO */}
               {userRole !== 'admin' && (
                 <button onClick={() => setActiveView('bag')} className={`text-white hover:text-gray-400 transition-all duration-300 relative cursor-pointer bg-transparent border-none outline-none ${cartPulse ? 'scale-125 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]' : 'scale-100'}`}>
                   <svg stroke="currentColor" fill="none" strokeWidth="1.5" viewBox="0 0 24 24" height="20" width="20"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path></svg>
@@ -121,27 +115,25 @@ function MainApp() {
                 </button>
               )}
 
-              {/* MENU DE USUARIO */}
               <div className="relative cursor-pointer" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setUserMenuAbierto(!userMenuAbierto); setMenuAbierto(null); }}>
                 <div className="text-white hover:text-gray-400 transition-colors bg-transparent border-none outline-none py-2">
                   <svg stroke="currentColor" fill="none" strokeWidth="1.5" viewBox="0 0 24 24" height="22" width="22"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path></svg>
                 </div>
                 <div className={`absolute top-full right-0 pt-2 z-[100] ${userMenuAbierto ? 'block' : 'hidden lg:group-hover:block'}`}>
                   <div className={`${cristalOpacoSubmenuClass} min-w-[150px] md:min-w-[200px] text-right`}>
-                    <div onClick={(e) => { e.stopPropagation(); setUserMenuAbierto(false); handleLogout(); }} className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-red-500 hover:text-red-400 transition-colors text-right bg-transparent border-none p-0 cursor-pointer outline-none block w-full py-2">Cerrar Sesión</div>
+                    <div onClick={(e) => { e.stopPropagation(); setUserMenuAbierto(false); handleLogout(); }} className="text-[12px] tracking-[0.2em] uppercase text-red-500 hover:text-red-400 transition-colors text-right bg-transparent border-none p-0 cursor-pointer outline-none block w-full py-2">Cerrar Sesión</div>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* LOGO */}
           <img src={LOGO_URL} alt="ANTARES" onClick={() => setActiveView('home')} className="h-16 md:h-32 w-auto mt-[10px] md:mt-[4px] z-[100] cursor-pointer" />
 
-          {/* NAVEGACIÓN PRINCIPAL */}
           {user && activeView === 'home' && (
             <nav className="w-full mt-4 mb-2 relative z-[100] px-2 md:px-6 pt-0 animate-fade-in">
-              <ul className="flex flex-wrap justify-center gap-y-4 gap-x-4 sm:gap-x-8 md:gap-x-16 py-2 text-[10px] md:text-sm tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase border-none bg-transparent">
+              {/* MENU PRINCIPAL EN 13 PUNTOS */}
+              <ul className="flex flex-wrap justify-center gap-y-4 gap-x-4 sm:gap-x-8 md:gap-x-16 py-2 text-[13px] tracking-[0.2em] uppercase border-none bg-transparent">
                 {Object.keys(estructuraCatalogo).map(menu => {
                   const isMenuHidden = hiddenItems.includes(menu);
                   if (userRole !== 'admin' && isMenuHidden) return null;
@@ -157,7 +149,8 @@ function MainApp() {
                             const isSubHidden = hiddenItems.includes(sub);
                             if (userRole !== 'admin' && isSubHidden) return null;
                             return (
-                              <div key={sub} onClick={(e) => { e.stopPropagation(); setMenuAbierto(null); irACategoria(sub); }} className={`cursor-pointer block mt-3 first:mt-0 text-[10px] md:text-xs transition-colors py-2 ${isSubHidden ? 'text-red-500' : 'text-gray-400 hover:text-gray-300'}`}>
+                              // SUBOPCIONES EN 12 PUNTOS
+                              <div key={sub} onClick={(e) => { e.stopPropagation(); setMenuAbierto(null); irACategoria(sub); }} className={`cursor-pointer block mt-3 first:mt-0 text-[12px] transition-colors py-2 ${isSubHidden ? 'text-red-500' : 'text-gray-400 hover:text-white'}`}>
                                 {sub}
                               </div>
                             );
@@ -180,10 +173,8 @@ function MainApp() {
           )}
         </header>
 
-        {/* MAIN ROUTER */}
         <main className="flex-grow flex flex-col items-center w-full px-4 sm:px-6 md:px-8">
           
-          {/* VISTA HOME RESTAURADA */}
           {(!user || activeView === 'home') && (
             <div className="w-full animate-fade-in flex flex-col items-center pb-20">
                <section className="w-full text-center py-16 md:py-32">
@@ -218,10 +209,9 @@ function MainApp() {
             </div>
           )}
 
-          {/* VISTA CATEGORÍA (Renderizando los ProductCards) */}
           {user && activeView === 'categoria' && activeCategory !== 'Prêt-à-Porter' && (
             <section className="container mx-auto py-8 md:py-16 flex-grow animate-fade-in w-full max-w-7xl">
-               <h2 className="text-[10px] md:text-[14px] tracking-[0.3em] uppercase text-white mb-8 md:mb-12 text-center border-b border-white/10 pb-4 md:pb-6 break-words">{activeCategory}</h2>
+               <h2 className="text-[13px] tracking-[0.3em] uppercase text-white mb-8 md:mb-12 text-center border-b border-white/10 pb-4 md:pb-6 break-words">{activeCategory}</h2>
                
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 w-full">
                  {productosMostrar.map(producto => (
@@ -241,7 +231,7 @@ function MainApp() {
 
         </main>
         
-        <footer className="bg-black py-8 md:py-12 text-center text-gray-600 text-[8px] sm:text-[10px] tracking-[0.3em] sm:tracking-[0.5em] uppercase border-none mt-auto px-4 screen-only w-full">
+        <footer className="bg-black py-8 md:py-12 text-center text-gray-600 text-[10px] tracking-[0.3em] sm:tracking-[0.5em] uppercase border-none mt-auto px-4 screen-only w-full">
           &copy; {new Date().getFullYear()} ANTARES. Elegancia Atemporal.
         </footer>
       </div>
@@ -251,7 +241,6 @@ function MainApp() {
   );
 }
 
-// Wrapper Principal
 export default function App() {
   return (
     <CartProvider>
