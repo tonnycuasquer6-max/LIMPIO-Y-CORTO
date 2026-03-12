@@ -27,17 +27,15 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
   const tallasDisponibles = ['6', '7', '8', '9', '10', '11', '12'];
 
   return (
-    // Borde a la derecha y abajo para formar la cuadrícula. 
     <div className="group relative bg-transparent flex flex-col p-6 w-full border-r border-b border-white/20 font-['Times_New_Roman',_Times,_serif]">
       
-      {/* LA ESTRELLA ✦ (Posicionada exactamente en la intersección de las líneas) */}
-      <span className="absolute -bottom-[10px] -right-[7px] text-[16px] text-white z-50 leading-none bg-black px-1">✦</span>
+      <span className="absolute -bottom-[9px] -right-[7px] text-[16px] text-white z-50 leading-none bg-black px-[2px]">✦</span>
 
       <div 
         className={`overflow-hidden aspect-square relative w-full mb-6 flex items-center justify-center ${userRole === 'cliente' ? 'cursor-pointer' : ''}`} 
         onClick={() => { if(userRole === 'cliente') setProductoSeleccionado(producto); }}
       >
-        <img src={producto.imagen_url} alt={producto.titulo} loading="lazy" className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-700" />
+        <img src={producto.imagen_url} alt={producto.titulo} loading="lazy" decoding="async" className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-700" />
         
         {userRole === 'admin' && (
           <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -63,7 +61,7 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
                   <button 
                     type="button"
                     onClick={(e) => { if (isAvailable) handleSelectTalla(e, talla); }}
-                    className={`min-w-[24px] h-[24px] flex items-center justify-center p-[2px] text-[12px] tracking-[0.1em] transition-all duration-300 border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-white/30 hover:border-white') : 'border-red-500/30 text-red-500 cursor-not-allowed opacity-50'}`}
+                    className={`min-w-[20px] h-[20px] flex items-center justify-center p-[2px] text-[12px] tracking-[0.1em] transition-all duration-300 border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-white/30 hover:border-white') : 'border-red-500/30 text-red-500 cursor-not-allowed opacity-50'}`}
                   >
                     {talla}
                   </button>
@@ -76,8 +74,7 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           </div>
         )}
         
-        {/* DESCRIPCIÓN: Forzada a blanco puro con style para que NADA la ponga gris */}
-        <p style={{ color: 'white' }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
+        <p style={{ color: '#ffffff' }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
           {producto.descripcion}
         </p>
 

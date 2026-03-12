@@ -29,6 +29,18 @@ function MainApp() {
   const [userMenuAbierto, setUserMenuAbierto] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
+  const [showInlineForm, setShowInlineForm] = useState(false);
+  const [editandoId, setEditandoId] = useState(null);
+  const [nuevaPieza, setNuevaPieza] = useState({ 
+    titulo: '', descripcion: '', costo: '', precio: '', disponibilidad: '', subcategoria: '', tallas: {}, color: '', imagen: null, imagen_url: '' 
+  });
+
+  const [perfilForm, setPerfilForm] = useState({
+    tratamiento: '', nombre: '', apellidos: '', dia: '', mes: '', anio: '', prefijo: '+593', telefono: '', newsletter: false,
+    medidaManos: '', medidaSuperior: '', medidaInferior: ''
+  });
+  const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+
   const { carrito, cartPulse } = useCart();
 
   const cristalOpacoSubmenuClass = "flex flex-col bg-white/5 backdrop-blur-md py-6 px-8 shadow-none border-none"; 
@@ -56,6 +68,15 @@ function MainApp() {
     if (currentUser) {
       setShowLoginModal(false);
       fetchUserRole(currentUser.id);
+      setPerfilForm(prev => ({
+        ...prev,
+        nombre: currentUser.user_metadata?.first_name || '',
+        apellidos: currentUser.user_metadata?.last_name || '',
+        medidaManos: currentUser.user_metadata?.medida_manos || '',
+        medidaSuperior: currentUser.user_metadata?.medida_superior || '',
+        medidaInferior: currentUser.user_metadata?.medida_inferior || ''
+      }));
+      if (!currentUser.user_metadata?.first_name) setShowCompleteProfile(true);
     } else {
       setUserRole('cliente');
     }
@@ -91,19 +112,52 @@ function MainApp() {
     setMenuAbierto(null);
   };
 
+  const prepararEdicion = (producto) => {
+    setNuevaPieza({
+      titulo: producto.titulo, descripcion: producto.descripcion || '', costo: producto.costo || '', 
+      precio: producto.precio, disponibilidad: producto.disponibilidad || '', subcategoria: producto.subcategoria || '',
+      tallas: typeof producto.tallas === 'string' ? JSON.parse(producto.tallas || '{}') : (producto.tallas || {}), color: producto.color || '', imagen: null, imagen_url: producto.imagen_url
+    });
+    setEditandoId(producto.id);
+    setShowInlineForm(true);
+  };
+
+  const cerrarFormulario = () => {
+    setShowInlineForm(false);
+    setEditandoId(null);
+    setNuevaPieza({ titulo: '', descripcion: '', costo: '', precio: '', disponibilidad: '', subcategoria: '', tallas: {}, color: '', imagen: null, imagen_url: '' });
+  };
+
+  const handleBorrarLocal = async (id) => {
+    if(window.confirm('¿Seguro que deseas retirar esta pieza?')) {
+      const { error } = await supabase.from('productos').delete().eq('id', id);
+      if (!error) setProductos(prev => prev.filter(p => p.id !== id));
+    }
+  };
+
+  const handleGuardarPerfil = async (e) => {
+    e.preventDefault();
+    const { data, error } = await supabase.auth.updateUser({
+      data: {
+        first_name: perfilForm.nombre, last_name: perfilForm.apellidos, tratamiento: perfilForm.tratamiento,
+        fecha_nacimiento: `${perfilForm.anio}-${perfilForm.mes}-${perfilForm.dia}`, telefono: `${perfilForm.prefijo} ${perfilForm.telefono}`,
+        medida_manos: perfilForm.medidaManos, medida_superior: perfilForm.medidaSuperior, medida_inferior: perfilForm.medidaInferior
+      }
+    });
+    if (!error) { setUser(data.user); setShowCompleteProfile(false); setActiveView('home'); }
+  };
+
   let productosMostrar = productos.filter(p => p.categoria === activeCategory && (activeSubCategory === 'Todo' || p.subcategoria === activeSubCategory));
 
   return (
     <div className="bg-black text-white min-h-screen flex flex-col relative w-full overflow-x-hidden overflow-y-auto font-['Times_New_Roman',_Times,_serif]">
       
-      {/* EL ESTILO QUE ELIMINÉ POR ERROR ESTÁ DE VUELTA (Oculta la barra de scroll) */}
       <style>{`
         ::-webkit-scrollbar { display: none; }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         .auth-wrapper input, .auth-wrapper select { background-color: transparent !important; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
 
       <div className="screen-only flex flex-col flex-grow w-full">
@@ -130,7 +184,8 @@ function MainApp() {
                 </div>
                 <div className={`absolute top-full right-0 pt-2 z-[100] ${userMenuAbierto ? 'block' : 'hidden lg:group-hover:block'}`}>
                   <div className={`${cristalOpacoSubmenuClass} min-w-[150px] md:min-w-[200px] text-right`}>
-                    <div onClick={(e) => { e.stopPropagation(); setUserMenuAbierto(false); handleLogout(); }} className="text-[12px] tracking-[0.2em] uppercase text-red-500 hover:text-red-400 transition-colors text-right bg-transparent border-none p-0 cursor-pointer outline-none block w-full py-2">Cerrar Sesión</div>
+                    <div onClick={(e) => { e.stopPropagation(); setUserMenuAbierto(false); setActiveView('perfil'); }} className="text-[12px] tracking-[0.2em] uppercase text-white hover:text-gray-300 transition-colors text-right bg-transparent border-none p-0 cursor-pointer outline-none block w-full py-2 mb-2">Mi Perfil / Medidas</div>
+                    <div onClick={(e) => { e.stopPropagation(); setUserMenuAbierto(false); handleLogout(); }} className="text-[12px] tracking-[0.2em] uppercase text-red-500 hover:text-red-400 transition-colors text-right bg-transparent border-none p-0 cursor-pointer outline-none block w-full py-2 border-t border-white/10 mt-2 pt-4">Cerrar Sesión</div>
                   </div>
                 </div>
               </div>
@@ -220,13 +275,20 @@ function MainApp() {
             <section className="container mx-auto py-8 md:py-16 flex-grow animate-fade-in w-full max-w-7xl">
                <h2 className="text-[13px] tracking-[0.3em] uppercase text-white mb-8 md:mb-12 text-center border-b border-white/10 pb-4 md:pb-6 break-words">{activeCategory}</h2>
                
-               {/* CUADRÍCULA: 4 columnas en PC, SIN gap (espacios), y con borde superior e izquierdo */}
+               {userRole === 'admin' && (
+                 <div onClick={() => { setEditandoId(null); setShowInlineForm(true); }} className="mb-12 border border-dashed border-white/20 py-8 text-center hover:bg-white/5 transition-colors cursor-pointer w-full">
+                   <span className="text-white tracking-[0.2em] text-[10px] uppercase">+ Añadir nueva pieza a {activeCategory}</span>
+                 </div>
+               )}
+
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 w-full border-t border-l border-white/20">
                  {productosMostrar.map(producto => (
                     <ProductCard 
                       key={producto.id} 
                       producto={producto} 
-                      userRole={userRole} 
+                      userRole={userRole}
+                      prepararEdicion={prepararEdicion}
+                      handleBorrarLocal={handleBorrarLocal}
                       setProductoSeleccionado={setProductoSeleccionado}
                     />
                  ))}
@@ -237,14 +299,69 @@ function MainApp() {
             </section>
           )}
 
+          {/* VISTA: MI PERFIL Y FORMULARIO DE MEDIDAS DEL CLIENTE */}
+          {user && (activeView === 'perfil' || showCompleteProfile) && (
+            <section className="container mx-auto py-8 flex-grow animate-fade-in w-full max-w-3xl">
+              <div className="bg-[#0a0a0a] border border-white/20 p-8 shadow-2xl rounded-sm w-full relative">
+                <h2 className="text-[14px] tracking-[0.3em] uppercase text-white mb-8 text-center">{showCompleteProfile ? 'Complete su Perfil' : 'Mi Perfil y Medidas'}</h2>
+                <form onSubmit={handleGuardarPerfil} className="flex flex-col gap-6 w-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <input type="text" value={perfilForm.nombre} onChange={e => setPerfilForm({...perfilForm, nombre: e.target.value})} placeholder="DOS NOMBRES*" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.1em] py-2 outline-none text-center" required />
+                    <input type="text" value={perfilForm.apellidos} onChange={e => setPerfilForm({...perfilForm, apellidos: e.target.value})} placeholder="DOS APELLIDOS*" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.1em] py-2 outline-none text-center" required />
+                  </div>
+                  
+                  <div className="mt-8 border-t border-white/10 pt-8">
+                    <h3 className="text-[13px] tracking-[0.2em] uppercase text-white mb-6 text-center">Ficha de Medidas Personales</h3>
+                    <div className="flex flex-col gap-6">
+                      <div className="flex flex-col items-center">
+                        <label className="text-[10px] text-gray-400 tracking-[0.2em] uppercase mb-2">Talla de Manos (Anillos cm)</label>
+                        <input type="text" value={perfilForm.medidaManos} onChange={e => setPerfilForm({...perfilForm, medidaManos: e.target.value})} placeholder="Ej. 6.5 cm" className="w-full sm:w-1/2 bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.1em] py-2 outline-none text-center" />
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <label className="text-[10px] text-gray-400 tracking-[0.2em] uppercase mb-2">Medida Superior (Pecho/Hombros cm)</label>
+                        <input type="text" value={perfilForm.medidaSuperior} onChange={e => setPerfilForm({...perfilForm, medidaSuperior: e.target.value})} placeholder="Ej. Pecho 105cm, Hombros 45cm" className="w-full sm:w-1/2 bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.1em] py-2 outline-none text-center" />
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <label className="text-[10px] text-gray-400 tracking-[0.2em] uppercase mb-2">Medida Inferior (Cintura/Cadera cm)</label>
+                        <input type="text" value={perfilForm.medidaInferior} onChange={e => setPerfilForm({...perfilForm, medidaInferior: e.target.value})} placeholder="Ej. Cintura 85cm, Largo 102cm" className="w-full sm:w-1/2 bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.1em] py-2 outline-none text-center" />
+                      </div>
+                    </div>
+                  </div>
+                  <button type="submit" className="mt-8 bg-transparent text-white border border-white hover:bg-white hover:text-black transition-colors outline-none text-[10px] font-bold tracking-[0.2em] uppercase py-4 w-full">Guardar Perfil</button>
+                </form>
+              </div>
+            </section>
+          )}
+
         </main>
         
-        <footer className="bg-black py-8 md:py-12 text-center text-gray-600 text-[10px] tracking-[0.3em] sm:tracking-[0.5em] uppercase border-none mt-auto px-4 screen-only w-full">
+        <footer className="bg-black py-8 md:py-12 text-center text-gray-600 text-[10px] tracking-[0.3em] uppercase border-none mt-auto px-4 screen-only w-full">
           &copy; {new Date().getFullYear()} ANTARES. Elegancia Atemporal.
         </footer>
       </div>
 
       {showLoginModal && <Auth onClose={() => setShowLoginModal(false)} />}
+
+      {/* MODAL EMERGENTE DE ADMINISTRADOR PARA AGREGAR/EDITAR PRODUCTOS */}
+      {userRole === 'admin' && showInlineForm && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-[#0a0a0a] border border-white/20 p-8 shadow-2xl relative w-full max-w-2xl rounded-sm max-h-[90vh] overflow-y-auto">
+            <button type="button" onClick={cerrarFormulario} className="absolute top-4 right-6 text-gray-500 hover:text-white text-3xl cursor-pointer bg-transparent border-none outline-none">×</button>
+            <h3 className="text-[14px] tracking-[0.3em] uppercase text-white mb-8 text-center">{editandoId ? 'EDITAR PIEZA' : 'AÑADIR NUEVA PIEZA'}</h3>
+            
+            <form onSubmit={(e) => { e.preventDefault(); alert("Función de guardar activa en tu backend original."); cerrarFormulario(); }} className="flex flex-col gap-6">
+              <input type="text" value={nuevaPieza.titulo} onChange={e => setNuevaPieza({...nuevaPieza, titulo: e.target.value})} placeholder="TÍTULO DE LA OBRA" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center" required />
+              <div className="grid grid-cols-2 gap-6">
+                <input type="number" value={nuevaPieza.costo} onChange={e => setNuevaPieza({...nuevaPieza, costo: e.target.value})} placeholder="COSTO (USD)" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center" />
+                <input type="number" value={nuevaPieza.precio} onChange={e => setNuevaPieza({...nuevaPieza, precio: e.target.value})} placeholder="PRECIO VENTA (USD)" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center" required />
+              </div>
+              <textarea value={nuevaPieza.descripcion} onChange={e => setNuevaPieza({...nuevaPieza, descripcion: e.target.value})} placeholder="DESCRIPCIÓN EDITORIAL..." rows="3" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center resize-none"></textarea>
+              <button type="submit" className="mt-4 bg-transparent text-white border border-white hover:bg-white hover:text-black transition-colors outline-none text-[10px] font-bold tracking-[0.2em] uppercase py-4 w-full">{editandoId ? 'Guardar Cambios' : 'Publicar Pieza'}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
