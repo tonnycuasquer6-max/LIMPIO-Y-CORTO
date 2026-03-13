@@ -201,7 +201,6 @@ function MainApp() {
 
           {user && activeView === 'home' && (
             <nav className="w-full mt-4 mb-2 relative z-[100] px-4 animate-fade-in">
-              {/* MENÚ EN 13 PUNTOS */}
               <ul className="flex flex-wrap justify-center gap-y-4 gap-x-6 md:gap-x-16 py-2 text-[13px] tracking-[0.2em] uppercase font-serif">
                 {Object.keys(estructuraCatalogo).map(menu => {
                   const isMenuHidden = hiddenItems.includes(menu);
@@ -218,7 +217,6 @@ function MainApp() {
                             const isSubHidden = hiddenItems.includes(sub);
                             if (userRole !== 'admin' && isSubHidden) return null;
                             return (
-                              // SUBMENÚ EN 12 PUNTOS
                               <div key={sub} onClick={(e) => { e.stopPropagation(); setMenuAbierto(null); irACategoria(sub); }} className={`cursor-pointer block mt-4 first:mt-0 text-[12px] transition-colors whitespace-nowrap ${isSubHidden ? 'text-red-500' : 'text-[#aaaaaa] hover:text-white font-serif'}`}>
                                 {sub}
                               </div>
@@ -271,7 +269,6 @@ function MainApp() {
                  </div>
                )}
 
-               {/* GRID 4 COLUMNAS EN PC CON BORDES DEFINIDOS */}
                <div className="w-full px-4 sm:px-0">
                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 w-full border-t border-l border-[#333333]">
                    {productosMostrar.map(producto => (
@@ -292,7 +289,6 @@ function MainApp() {
             </section>
           )}
 
-          {/* PERFIL Y FORMULARIO DE MEDIDAS */}
           {user && (activeView === 'perfil' || showCompleteProfile) && (
             <section className="container mx-auto py-12 flex-grow animate-fade-in w-full max-w-3xl px-4">
               <div className="bg-black border border-[#333333] p-8 shadow-2xl w-full">
@@ -335,7 +331,6 @@ function MainApp() {
 
       {showLoginModal && <Auth onClose={() => setShowLoginModal(false)} />}
 
-      {/* MODAL DEL PRODUCTO (Forzando Texto Blanco) */}
       {productoSeleccionado && (
         <div className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center p-4 animate-fade-in font-serif" onClick={() => {setProductoSeleccionado(null); setTallasSeleccionadasModal([]);}}>
           <div className="w-full max-w-md md:max-w-4xl flex flex-col md:flex-row relative shadow-2xl border border-[#333333] bg-black max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -377,16 +372,13 @@ function MainApp() {
                        <button onClick={(e) => { if(modalCanBuy) { agregarAlCarrito(productoSeleccionado, tallasSeleccionadasModal); setProductoSeleccionado(null); setTallasSeleccionadasModal([]); } }} className={`w-full sm:w-auto px-8 py-3 text-[10px] font-bold tracking-[0.2em] uppercase transition-colors border outline-none ${modalCanBuy ? 'bg-transparent text-white border-[#555555] hover:border-white' : 'bg-transparent text-[#555555] border-[#333333] cursor-not-allowed'}`}>
                          {modalCanBuy ? 'AÑADIR AL BOLSO' : 'ELIJA TALLA'}
                        </button>
-                       <button onClick={(e) => { e.stopPropagation(); toggleFavorito(productoSeleccionado.id); }} className="w-full sm:w-auto border border-[#333333] hover:border-white py-3 px-6 text-white transition-colors text-[10px] tracking-[0.2em] uppercase outline-none">
-                         {favoritos.includes(productoSeleccionado.id) ? 'QUITAR' : 'GUARDAR'}
-                       </button>
                      </div>
                    )}
                  </div>
                  );
               })()}
 
-              <p className="text-white text-[12px] leading-loose mb-8 uppercase tracking-[0.1em] w-full">
+              <p style={{ color: '#ffffff' }} className="text-[12px] leading-loose mb-8 uppercase tracking-[0.1em] w-full">
                 {productoSeleccionado.descripcion}
               </p>
             </div>
@@ -394,13 +386,12 @@ function MainApp() {
         </div>
       )}
 
-      {/* MODAL EMERGENTE DE ADMINISTRADOR PARA AGREGAR/EDITAR PRODUCTOS */}
       {userRole === 'admin' && showInlineForm && (
         <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4 animate-fade-in font-serif">
           <div className="bg-black border border-[#333333] p-8 shadow-2xl relative w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <button type="button" onClick={cerrarFormulario} className="absolute top-4 right-6 text-[#aaaaaa] hover:text-white text-3xl cursor-pointer bg-transparent border-none outline-none">×</button>
             <h3 className="text-[14px] tracking-[0.3em] uppercase text-white mb-8 text-center">{editandoId ? 'EDITAR PIEZA' : 'AÑADIR NUEVA PIEZA'}</h3>
-            <form onSubmit={(e) => { e.preventDefault(); alert("Función guardado backend original activa."); cerrarFormulario(); }} className="flex flex-col gap-6">
+            <form onSubmit={(e) => { e.preventDefault(); alert("Función guardado backend activa."); cerrarFormulario(); }} className="flex flex-col gap-6">
               <input type="text" value={nuevaPieza.titulo} onChange={e => setNuevaPieza({...nuevaPieza, titulo: e.target.value})} placeholder="TÍTULO DE LA OBRA" className="w-full bg-transparent border-b border-[#555555] focus:border-white text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center transition-colors" required />
               <div className="grid grid-cols-2 gap-6">
                 <input type="number" value={nuevaPieza.costo} onChange={e => setNuevaPieza({...nuevaPieza, costo: e.target.value})} placeholder="COSTO (USD)" className="w-full bg-transparent border-b border-[#555555] focus:border-white text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center transition-colors" />

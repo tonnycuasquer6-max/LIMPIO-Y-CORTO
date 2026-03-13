@@ -37,7 +37,6 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
   return (
     <div className="group relative bg-black flex flex-col p-6 w-full border-r border-b border-[#333333] font-serif">
       
-      {/* Estrella en la intersección: Color sólido para que destaque sobre la línea */}
       <span className="absolute -bottom-[9px] -right-[8px] text-[16px] text-[#aaaaaa] z-40 bg-black leading-none">✦</span>
 
       <div 
@@ -68,7 +67,6 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
       </div>
       
       <div className="flex flex-col flex-grow items-center text-center w-full">
-        {/* Título en 13pt */}
         <h4 className="text-[13px] tracking-[0.2em] uppercase text-white mb-2">{producto.titulo}</h4>
         <span className="text-[13px] tracking-[0.1em] text-white font-light mb-6">${producto.precio} USD</span>
         
@@ -84,8 +82,7 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
                   <button 
                     type="button"
                     onClick={(e) => { if (isAvailable) handleSelectTalla(e, talla); }}
-                    // Cuadro ajustado: 24x24px, texto en 12pt
-                    className={`w-[24px] h-[24px] flex items-center justify-center text-[12px] tracking-[0.1em] transition-all border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-[#555555] hover:border-white') : 'border-red-900 text-red-500 cursor-not-allowed opacity-50'}`}
+                    className={`w-[24px] h-[24px] flex items-center justify-center p-[2px] text-[12px] tracking-[0.1em] transition-all border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-[#555555] hover:border-white') : 'border-red-900 text-red-500 cursor-not-allowed opacity-50'}`}
                   >
                     {talla}
                   </button>
@@ -98,8 +95,7 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           </div>
         )}
         
-        {/* Descripción en 12pt y blanco puro garantizado */}
-        <p className="text-white text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
+        <p style={{ color: '#ffffff' }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
           {producto.descripcion}
         </p>
 
