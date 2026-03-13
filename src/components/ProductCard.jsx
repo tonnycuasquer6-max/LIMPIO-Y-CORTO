@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCart } from '../contexts/CartContext';
 
 export default function ProductCard({ producto, userRole, prepararEdicion, handleBorrarLocal, setProductoSeleccionado }) {
   const { favoritos, toggleFavorito, agregarAlCarrito } = useCart();
   const [tallasSeleccionadas, setTallasSeleccionadas] = useState([]);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const imgRef = useRef(null);
 
   const isRing = producto.subcategoria === 'Anillos';
   const canBuy = !isRing || tallasSeleccionadas.length > 0;
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setImgLoaded(true);
+    }
+  }, []);
 
   const handleSelectTalla = (e, talla) => {
     e.stopPropagation();
@@ -28,27 +35,28 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
   const tallasDisponibles = ['6', '7', '8', '9', '10', '11', '12'];
 
   return (
-    <div className="group relative bg-transparent flex flex-col p-4 sm:p-6 w-full border-r border-b border-white/40" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+    <div className="group relative bg-black flex flex-col p-6 w-full border-r border-b border-[#333333] font-serif">
       
-      {/* Estrella en la intersección inferior derecha */}
-      <span className="absolute -bottom-[12px] -right-[10px] text-[20px] text-white z-50 leading-none bg-black px-1">✦</span>
+      {/* Estrella en la intersección: Color sólido para que destaque sobre la línea */}
+      <span className="absolute -bottom-[9px] -right-[8px] text-[16px] text-[#aaaaaa] z-40 bg-black leading-none">✦</span>
 
       <div 
         className={`overflow-hidden aspect-square relative w-full mb-6 flex items-center justify-center ${userRole === 'cliente' ? 'cursor-pointer' : ''}`} 
         onClick={() => { if(userRole === 'cliente') setProductoSeleccionado(producto); }}
       >
-        {/* Estrella animada mientras carga la imagen */}
         {!imgLoaded && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <span className="animate-spin text-white text-4xl">✦</span>
+            <span className="animate-spin text-white text-2xl">✦</span>
           </div>
         )}
 
         <img 
+          ref={imgRef}
           src={producto.imagen_url} 
           alt={producto.titulo} 
+          loading="lazy"
           onLoad={() => setImgLoaded(true)}
-          className={`w-full h-full object-contain transition-opacity duration-700 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`} 
+          className={`w-full h-full object-contain transition-opacity duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`} 
         />
         
         {userRole === 'admin' && (
@@ -60,6 +68,7 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
       </div>
       
       <div className="flex flex-col flex-grow items-center text-center w-full">
+        {/* Título en 13pt */}
         <h4 className="text-[13px] tracking-[0.2em] uppercase text-white mb-2">{producto.titulo}</h4>
         <span className="text-[13px] tracking-[0.1em] text-white font-light mb-6">${producto.precio} USD</span>
         
@@ -75,12 +84,13 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
                   <button 
                     type="button"
                     onClick={(e) => { if (isAvailable) handleSelectTalla(e, talla); }}
-                    className={`min-w-[20px] h-[20px] flex items-center justify-center p-[2px] text-[12px] tracking-[0.1em] transition-all duration-300 border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-white/30 hover:border-white') : 'border-red-500/30 text-red-500 cursor-not-allowed opacity-50'}`}
+                    // Cuadro ajustado: 24x24px, texto en 12pt
+                    className={`w-[24px] h-[24px] flex items-center justify-center text-[12px] tracking-[0.1em] transition-all border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-[#555555] hover:border-white') : 'border-red-900 text-red-500 cursor-not-allowed opacity-50'}`}
                   >
                     {talla}
                   </button>
-                  <span className={`text-[10px] tracking-[0.1em] uppercase leading-none ${isAvailable ? 'text-gray-400' : 'text-red-500/70'}`}>
-                    {stock}
+                  <span className={`text-[10px] tracking-[0.1em] uppercase leading-none ${isAvailable ? 'text-red-600' : 'text-red-900'}`}>
+                    {stock === 0 ? '0' : stock}
                   </span>
                 </div>
               );
@@ -88,14 +98,14 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           </div>
         )}
         
-        {/* Descripción forzada a blanco #ffffff y opacidad 1 */}
-        <p style={{ color: '#ffffff', opacity: 1 }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
+        {/* Descripción en 12pt y blanco puro garantizado */}
+        <p className="text-white text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
           {producto.descripcion}
         </p>
 
         {userRole === 'cliente' && !producto.vendido && (
             <div className="flex gap-2 mt-auto w-full justify-center z-30">
-               <button onClick={onComprar} className={`w-full py-2 text-[10px] tracking-[0.2em] font-bold uppercase transition-colors border outline-none ${canBuy ? 'bg-transparent text-white border-white hover:bg-white hover:text-black' : 'bg-transparent text-gray-500 border-gray-600 cursor-not-allowed'}`}>
+               <button onClick={onComprar} className={`w-full py-3 text-[10px] tracking-[0.2em] font-bold uppercase transition-colors border outline-none ${canBuy ? 'bg-transparent text-white border-[#555555] hover:border-white' : 'bg-transparent text-[#555555] border-[#333333] cursor-not-allowed'}`}>
                  {canBuy ? 'COMPRAR' : 'ELIJA TALLA'}
                </button>
             </div>
