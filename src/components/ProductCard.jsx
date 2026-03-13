@@ -4,6 +4,7 @@ import { useCart } from '../contexts/CartContext';
 export default function ProductCard({ producto, userRole, prepararEdicion, handleBorrarLocal, setProductoSeleccionado }) {
   const { favoritos, toggleFavorito, agregarAlCarrito } = useCart();
   const [tallasSeleccionadas, setTallasSeleccionadas] = useState([]);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const isRing = producto.subcategoria === 'Anillos';
   const canBuy = !isRing || tallasSeleccionadas.length > 0;
@@ -27,15 +28,28 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
   const tallasDisponibles = ['6', '7', '8', '9', '10', '11', '12'];
 
   return (
-    <div className="group relative bg-transparent flex flex-col p-6 w-full border-r border-b border-white/20 font-['Times_New_Roman',_Times,_serif]">
+    <div className="group relative bg-transparent flex flex-col p-4 sm:p-6 w-full border-r border-b border-white/40" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
       
-      <span className="absolute -bottom-[9px] -right-[7px] text-[16px] text-white z-50 leading-none bg-black px-[2px]">✦</span>
+      {/* Estrella en la intersección inferior derecha */}
+      <span className="absolute -bottom-[12px] -right-[10px] text-[20px] text-white z-50 leading-none bg-black px-1">✦</span>
 
       <div 
         className={`overflow-hidden aspect-square relative w-full mb-6 flex items-center justify-center ${userRole === 'cliente' ? 'cursor-pointer' : ''}`} 
         onClick={() => { if(userRole === 'cliente') setProductoSeleccionado(producto); }}
       >
-        <img src={producto.imagen_url} alt={producto.titulo} loading="lazy" decoding="async" className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-700" />
+        {/* Estrella animada mientras carga la imagen */}
+        {!imgLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <span className="animate-spin text-white text-4xl">✦</span>
+          </div>
+        )}
+
+        <img 
+          src={producto.imagen_url} 
+          alt={producto.titulo} 
+          onLoad={() => setImgLoaded(true)}
+          className={`w-full h-full object-contain transition-opacity duration-700 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`} 
+        />
         
         {userRole === 'admin' && (
           <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -74,7 +88,8 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           </div>
         )}
         
-        <p style={{ color: '#ffffff' }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
+        {/* Descripción forzada a blanco #ffffff y opacidad 1 */}
+        <p style={{ color: '#ffffff', opacity: 1 }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
           {producto.descripcion}
         </p>
 

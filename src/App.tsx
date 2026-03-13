@@ -41,7 +41,8 @@ function MainApp() {
   });
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
 
-  const { carrito, cartPulse } = useCart();
+  const { carrito, cartPulse, favoritos, toggleFavorito, agregarAlCarrito } = useCart();
+  const [tallasSeleccionadasModal, setTallasSeleccionadasModal] = useState([]);
 
   const cristalOpacoSubmenuClass = "flex flex-col bg-white/5 backdrop-blur-md py-6 px-8 shadow-none border-none"; 
   const menuUnderlineClass = "absolute bottom-0 h-px bg-white transition-all duration-300";
@@ -147,10 +148,15 @@ function MainApp() {
     if (!error) { setUser(data.user); setShowCompleteProfile(false); setActiveView('home'); }
   };
 
+  const handleSelectTallaModal = (e, talla) => {
+    e.stopPropagation();
+    setTallasSeleccionadasModal(prev => prev.includes(talla) ? prev.filter(t => t !== talla) : [...prev, talla]);
+  };
+
   let productosMostrar = productos.filter(p => p.categoria === activeCategory && (activeSubCategory === 'Todo' || p.subcategoria === activeSubCategory));
 
   return (
-    <div className="bg-black text-white min-h-screen flex flex-col relative w-full overflow-x-hidden overflow-y-auto font-['Times_New_Roman',_Times,_serif]">
+    <div className="bg-black text-white min-h-screen flex flex-col relative w-full overflow-x-hidden overflow-y-auto" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
       
       <style>{`
         ::-webkit-scrollbar { display: none; }
@@ -235,10 +241,10 @@ function MainApp() {
           )}
         </header>
 
-        <main className="flex-grow flex flex-col items-center w-full px-4 sm:px-6 md:px-8">
+        <main className="flex-grow flex flex-col items-center w-full px-0 sm:px-6 md:px-8">
           
           {(!user || activeView === 'home') && (
-            <div className="w-full animate-fade-in flex flex-col items-center pb-20">
+            <div className="w-full animate-fade-in flex flex-col items-center pb-20 px-4">
                <section className="w-full text-center py-16 md:py-32">
                  <h2 className="text-4xl md:text-8xl font-bold tracking-[0.2em] uppercase text-white mb-6 md:mb-8 opacity-90 break-words">Elegancia Atemporal</h2>
                  <p className="text-gray-400 tracking-[0.2em] uppercase text-[10px] md:text-xs max-w-2xl mx-auto leading-loose px-4">
@@ -273,15 +279,16 @@ function MainApp() {
 
           {user && activeView === 'categoria' && activeCategory !== 'Prêt-à-Porter' && (
             <section className="container mx-auto py-8 md:py-16 flex-grow animate-fade-in w-full max-w-7xl">
-               <h2 className="text-[13px] tracking-[0.3em] uppercase text-white mb-8 md:mb-12 text-center border-b border-white/10 pb-4 md:pb-6 break-words">{activeCategory}</h2>
+               <h2 className="text-[13px] tracking-[0.3em] uppercase text-white mb-8 md:mb-12 text-center border-b border-white/10 pb-4 md:pb-6 break-words px-4">{activeCategory}</h2>
                
                {userRole === 'admin' && (
-                 <div onClick={() => { setEditandoId(null); setShowInlineForm(true); }} className="mb-12 border border-dashed border-white/20 py-8 text-center hover:bg-white/5 transition-colors cursor-pointer w-full">
+                 <div onClick={() => { setEditandoId(null); setShowInlineForm(true); }} className="mb-12 border border-dashed border-white/40 mx-4 py-8 text-center hover:bg-white/5 transition-colors cursor-pointer">
                    <span className="text-white tracking-[0.2em] text-[10px] uppercase">+ Añadir nueva pieza a {activeCategory}</span>
                  </div>
                )}
 
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 w-full border-t border-l border-white/20">
+               {/* GRID PARA PC (4 col) Y MOVIL (2 col). Bordes fuertes white/40 */}
+               <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 w-full border-t border-l border-white/40">
                  {productosMostrar.map(producto => (
                     <ProductCard 
                       key={producto.id} 
@@ -293,15 +300,14 @@ function MainApp() {
                     />
                  ))}
                  {productosMostrar.length === 0 && (
-                    <p className="text-gray-500 tracking-[0.2em] uppercase text-[10px] col-span-full text-center py-10 w-full border-r border-b border-white/20">No hay piezas en esta categoría aún.</p>
+                    <p className="text-white tracking-[0.2em] uppercase text-[12px] col-span-full text-center py-10 w-full border-r border-b border-white/40">No hay piezas en esta categoría aún.</p>
                  )}
                </div>
             </section>
           )}
 
-          {/* VISTA: MI PERFIL Y FORMULARIO DE MEDIDAS DEL CLIENTE */}
           {user && (activeView === 'perfil' || showCompleteProfile) && (
-            <section className="container mx-auto py-8 flex-grow animate-fade-in w-full max-w-3xl">
+            <section className="container mx-auto py-8 flex-grow animate-fade-in w-full max-w-3xl px-4">
               <div className="bg-[#0a0a0a] border border-white/20 p-8 shadow-2xl rounded-sm w-full relative">
                 <h2 className="text-[14px] tracking-[0.3em] uppercase text-white mb-8 text-center">{showCompleteProfile ? 'Complete su Perfil' : 'Mi Perfil y Medidas'}</h2>
                 <form onSubmit={handleGuardarPerfil} className="flex flex-col gap-6 w-full">
@@ -342,14 +348,71 @@ function MainApp() {
 
       {showLoginModal && <Auth onClose={() => setShowLoginModal(false)} />}
 
-      {/* MODAL EMERGENTE DE ADMINISTRADOR PARA AGREGAR/EDITAR PRODUCTOS */}
+      {/* MODAL DEL PRODUCTO PARA CLIC EN MÓVIL/PC (Texto Blanco Forzado) */}
+      {productoSeleccionado && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4 screen-only animate-fade-in" onClick={() => {setProductoSeleccionado(null); setTallasSeleccionadasModal([]);}}>
+          <div className="w-full max-w-md md:max-w-4xl flex flex-col md:flex-row relative shadow-2xl border border-white/20 rounded-none bg-[#0a0a0a] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <button onClick={() => {setProductoSeleccionado(null); setTallasSeleccionadasModal([]);}} className="absolute top-4 right-4 text-white hover:text-gray-300 z-[250] text-3xl cursor-pointer bg-transparent border-none outline-none">×</button>
+            <div className="w-full md:w-1/2 p-6 flex flex-col justify-center min-h-[300px]">
+              <img src={productoSeleccionado.imagen_url} alt={productoSeleccionado.titulo} className="w-full h-full object-contain" />
+            </div>
+            <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center text-center bg-[#0a0a0a] border-t md:border-t-0 md:border-l border-white/20">
+              <h2 className="text-[14px] md:text-[16px] tracking-[0.2em] uppercase text-white mb-2">{productoSeleccionado.titulo}</h2>
+              <p className="text-[14px] tracking-[0.1em] text-white font-light mb-8">${productoSeleccionado.precio} USD</p>
+              
+              {productoSeleccionado.subcategoria === 'Anillos' && (() => {
+                 const modalTallasObj = typeof productoSeleccionado.tallas === 'string' ? JSON.parse(productoSeleccionado.tallas || '{}') : (productoSeleccionado.tallas || {});
+                 const modalCanBuy = tallasSeleccionadasModal.length > 0;
+                 return (
+                 <div className="flex flex-col items-center w-full mb-8">
+                   <p style={{ color: '#ffffff' }} className="text-[10px] tracking-[0.2em] mb-6 uppercase">Seleccione su talla</p>
+                   <div className="flex flex-wrap justify-center gap-3 w-full">
+                     {['6', '7', '8', '9', '10', '11', '12'].map(talla => {
+                       const stock = parseInt(modalTallasObj[talla] || 0);
+                       const isAvailable = stock > 0;
+                       const isSelected = tallasSeleccionadasModal.includes(talla);
+                       return (
+                         <div key={talla} className="flex flex-col items-center gap-1">
+                           <button 
+                             type="button"
+                             onClick={(e) => { if(isAvailable) handleSelectTallaModal(e, talla); }}
+                             className={`min-w-[24px] h-[24px] flex items-center justify-center p-[2px] text-[12px] tracking-[0.1em] transition-all duration-300 border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-white/30 hover:border-white') : 'border-red-500/30 text-red-500 cursor-not-allowed opacity-50'}`}
+                           >
+                             {talla}
+                           </button>
+                           <span className={`text-[10px] tracking-[0.1em] uppercase leading-none ${isAvailable ? 'text-gray-400' : 'text-red-500/70'}`}>{stock}</span>
+                         </div>
+                       );
+                     })}
+                   </div>
+                   {userRole === 'cliente' && !productoSeleccionado.vendido && (
+                     <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full justify-center">
+                       <button onClick={(e) => { if(modalCanBuy) { agregarAlCarrito(productoSeleccionado, tallasSeleccionadasModal); setProductoSeleccionado(null); setTallasSeleccionadasModal([]); } }} className={`w-full sm:w-auto px-8 py-3 text-[10px] font-bold tracking-[0.2em] uppercase transition-colors border outline-none ${modalCanBuy ? 'bg-transparent text-white border-white hover:bg-white hover:text-black' : 'bg-transparent text-gray-500 border-gray-600 cursor-not-allowed'}`}>
+                         {modalCanBuy ? 'AÑADIR AL BOLSO' : 'ELIJA TALLA'}
+                       </button>
+                       <button onClick={(e) => { e.stopPropagation(); toggleFavorito(productoSeleccionado.id); }} className="w-full sm:w-auto border border-white/30 py-3 px-6 text-white hover:bg-white hover:text-black transition-colors text-[10px] tracking-[0.2em] uppercase outline-none">
+                         {favoritos.includes(productoSeleccionado.id) ? 'QUITAR' : 'GUARDAR'}
+                       </button>
+                     </div>
+                   )}
+                 </div>
+                 );
+              })()}
+
+              <p style={{ color: '#ffffff', opacity: 1 }} className="text-[12px] leading-loose mb-8 uppercase tracking-[0.1em] w-full">
+                {productoSeleccionado.descripcion}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {userRole === 'admin' && showInlineForm && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-[#0a0a0a] border border-white/20 p-8 shadow-2xl relative w-full max-w-2xl rounded-sm max-h-[90vh] overflow-y-auto">
             <button type="button" onClick={cerrarFormulario} className="absolute top-4 right-6 text-gray-500 hover:text-white text-3xl cursor-pointer bg-transparent border-none outline-none">×</button>
             <h3 className="text-[14px] tracking-[0.3em] uppercase text-white mb-8 text-center">{editandoId ? 'EDITAR PIEZA' : 'AÑADIR NUEVA PIEZA'}</h3>
-            
-            <form onSubmit={(e) => { e.preventDefault(); alert("Función de guardar activa en tu backend original."); cerrarFormulario(); }} className="flex flex-col gap-6">
+            <form onSubmit={(e) => { e.preventDefault(); alert("Función guardado backend original activa."); cerrarFormulario(); }} className="flex flex-col gap-6">
               <input type="text" value={nuevaPieza.titulo} onChange={e => setNuevaPieza({...nuevaPieza, titulo: e.target.value})} placeholder="TÍTULO DE LA OBRA" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center" required />
               <div className="grid grid-cols-2 gap-6">
                 <input type="number" value={nuevaPieza.costo} onChange={e => setNuevaPieza({...nuevaPieza, costo: e.target.value})} placeholder="COSTO (USD)" className="w-full bg-transparent border-b border-white/20 text-white text-[12px] tracking-[0.2em] py-2 outline-none text-center" />
