@@ -1,8 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { useCart } from '../contexts/CartContext';
+import { useState, useRef, useEffect } from 'react';
 
-export default function ProductCard({ producto, userRole, prepararEdicion, handleBorrarLocal, setProductoSeleccionado }) {
-  const { favoritos, toggleFavorito, agregarAlCarrito } = useCart();
+export default function ProductCard({ producto, userRole, prepararEdicion, handleBorrarLocal, setProductoSeleccionado, agregarAlCarrito, toggleFavorito, favoritos, handleToggleVendidoAdmin }) {
   const [tallasSeleccionadas, setTallasSeleccionadas] = useState([]);
   const [imgLoaded, setImgLoaded] = useState(false);
   const imgRef = useRef(null);
@@ -26,7 +24,7 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
   const onComprar = (e) => {
     e.stopPropagation();
     if (canBuy) {
-      agregarAlCarrito(producto, tallasSeleccionadas);
+      agregarAlCarrito(producto, e, tallasSeleccionadas);
       setTallasSeleccionadas([]);
     }
   };
@@ -35,17 +33,19 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
   const tallasDisponibles = ['6', '7', '8', '9', '10', '11', '12'];
 
   return (
-    <div className="group relative bg-black flex flex-col p-6 w-full border-r border-b border-[#333333] font-serif">
+    <div style={{ borderRight: '1px solid #333333', borderBottom: '1px solid #333333', position: 'relative', display: 'flex', flexDirection: 'column', padding: '24px', fontFamily: '"Times New Roman", Times, serif', backgroundColor: 'transparent' }}>
       
-      <span className="absolute -bottom-[9px] -right-[8px] text-[16px] text-[#aaaaaa] z-40 bg-black leading-none">✦</span>
+      {/* 6. ESTRELLA DE 4 PUNTOS EN LA INTERSECCIÓN */}
+      <span style={{ position: 'absolute', bottom: '-13px', right: '-10px', color: '#ffffff', fontSize: '22px', backgroundColor: '#000000', padding: '0 2px', zIndex: 50, lineHeight: 1 }}>✦</span>
 
       <div 
-        className={`overflow-hidden aspect-square relative w-full mb-6 flex items-center justify-center ${userRole === 'cliente' ? 'cursor-pointer' : ''}`} 
+        style={{ position: 'relative', width: '100%', aspectRatio: '1/1', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: userRole === 'cliente' ? 'pointer' : 'default', overflow: 'hidden' }} 
         onClick={() => { if(userRole === 'cliente') setProductoSeleccionado(producto); }}
       >
+        {/* 8. ANIMACIÓN DE CARGA PARA LAS FOTOS */}
         {!imgLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <span className="animate-spin text-white text-2xl">✦</span>
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
+            <span className="animate-spin block" style={{ color: 'white', fontSize: '32px' }}>✦</span>
           </div>
         )}
 
@@ -55,38 +55,45 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           alt={producto.titulo} 
           loading="lazy"
           onLoad={() => setImgLoaded(true)}
-          className={`w-full h-full object-contain transition-opacity duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`} 
+          style={{ width: '100%', height: '100%', objectFit: 'contain', opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.7s ease-in-out' }} 
         />
         
         {userRole === 'admin' && (
-          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-            <button onClick={(e) => { e.stopPropagation(); prepararEdicion(producto); }} className="bg-black/80 p-2 text-white rounded-full">✏️</button>
-            <button onClick={(e) => { e.stopPropagation(); handleBorrarLocal(producto.id); }} className="bg-black/80 p-2 text-white rounded-full text-red-500">🗑️</button>
+          <div style={{ position: 'absolute', top: '8px', right: '8px', display: 'flex', gap: '8px', zIndex: 20 }}>
+            <button onClick={(e) => { e.stopPropagation(); prepararEdicion(producto); }} style={{ background: 'rgba(0,0,0,0.8)', padding: '8px', color: 'white', borderRadius: '50%', border: '1px solid #333', cursor: 'pointer' }}>✏️</button>
+            <button onClick={(e) => { e.stopPropagation(); handleBorrarLocal(producto.id); }} style={{ background: 'rgba(0,0,0,0.8)', padding: '8px', color: 'red', borderRadius: '50%', border: '1px solid #333', cursor: 'pointer' }}>🗑️</button>
           </div>
         )}
       </div>
       
-      <div className="flex flex-col flex-grow items-center text-center w-full">
-        <h4 className="text-[13px] tracking-[0.2em] uppercase text-white mb-2">{producto.titulo}</h4>
-        <span className="text-[13px] tracking-[0.1em] text-white font-light mb-6">${producto.precio} USD</span>
+      <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, alignItems: 'center', textAlign: 'center', width: '100%' }}>
+        {/* 2. TÍTULOS EN 13 PUNTOS TIMES NEW ROMAN */}
+        <h4 style={{ fontSize: '13px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#ffffff', marginBottom: '8px', margin: 0 }}>{producto.titulo}</h4>
+        <span style={{ fontSize: '13px', letterSpacing: '0.1em', color: '#ffffff', fontWeight: 'lighter', marginBottom: '24px', display: 'block', marginTop: '8px' }}>${producto.precio} USD</span>
         
         {isRing && (
-          <div className="flex flex-wrap justify-center gap-2 mb-6 w-full">
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginBottom: '24px', width: '100%' }}>
             {tallasDisponibles.map(talla => {
               const stock = parseInt(tallasObj[talla] || 0);
               const isAvailable = stock > 0;
               const isSelected = tallasSeleccionadas.includes(talla);
               
               return (
-                <div key={talla} className="flex flex-col items-center gap-1">
+                <div key={talla} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  {/* 3. CUADRADO DE TALLAS A 2PX CON NÚMEROS A 12 PUNTOS */}
                   <button 
                     type="button"
                     onClick={(e) => { if (isAvailable) handleSelectTalla(e, talla); }}
-                    className={`w-[24px] h-[24px] flex items-center justify-center p-[2px] text-[12px] tracking-[0.1em] transition-all border outline-none ${isAvailable ? (isSelected ? 'bg-white text-black border-white font-bold' : 'bg-transparent text-white border-[#555555] hover:border-white') : 'border-red-900 text-red-500 cursor-not-allowed opacity-50'}`}
+                    style={{
+                      minWidth: '24px', height: '24px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '12px', letterSpacing: '0.1em', border: isAvailable ? (isSelected ? '1px solid #ffffff' : '1px solid #555555') : '1px solid #333333',
+                      backgroundColor: isSelected ? '#ffffff' : 'transparent', color: isAvailable ? (isSelected ? '#000000' : '#ffffff') : '#555555',
+                      cursor: isAvailable ? 'pointer' : 'not-allowed', outline: 'none', transition: 'all 0.3s'
+                    }}
                   >
                     {talla}
                   </button>
-                  <span className={`text-[10px] tracking-[0.1em] uppercase leading-none ${isAvailable ? 'text-red-600' : 'text-red-900'}`}>
+                  <span style={{ fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: isAvailable ? '#aaaaaa' : '#555555' }}>
                     {stock === 0 ? '0' : stock}
                   </span>
                 </div>
@@ -95,16 +102,28 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           </div>
         )}
         
-        <p style={{ color: '#ffffff' }} className="text-[12px] line-clamp-2 leading-relaxed mb-6 uppercase w-full">
+        {/* 4. DESCRIPCIÓN COLOR BLANCO Y 12 PUNTOS FORZADO */}
+        <p style={{ color: '#ffffff', fontSize: '12px', lineHeight: '1.8', marginBottom: '24px', textTransform: 'uppercase', width: '100%', margin: 0, opacity: 1 }}>
           {producto.descripcion}
         </p>
 
+        {/* BOTÓN CLIENTES */}
         {userRole === 'cliente' && !producto.vendido && (
-            <div className="flex gap-2 mt-auto w-full justify-center z-30">
-               <button onClick={onComprar} className={`w-full py-3 text-[10px] tracking-[0.2em] font-bold uppercase transition-colors border outline-none ${canBuy ? 'bg-transparent text-white border-[#555555] hover:border-white' : 'bg-transparent text-[#555555] border-[#333333] cursor-not-allowed'}`}>
+            <div style={{ display: 'flex', gap: '8px', marginTop: 'auto', width: '100%', justifyContent: 'center' }}>
+               <button onClick={onComprar} style={{ flexGrow: 1, padding: '12px', fontSize: '10px', letterSpacing: '0.2em', fontWeight: 'bold', textTransform: 'uppercase', border: canBuy ? '1px solid #ffffff' : '1px solid #555555', backgroundColor: 'transparent', color: canBuy ? '#ffffff' : '#555555', cursor: canBuy ? 'pointer' : 'not-allowed', outline: 'none' }}>
                  {canBuy ? 'COMPRAR' : 'ELIJA TALLA'}
                </button>
+               <button onClick={(e) => { e.stopPropagation(); toggleFavorito(producto.id); }} style={{ padding: '12px 24px', border: '1px solid #333333', backgroundColor: 'transparent', color: '#ffffff', cursor: 'pointer', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', outline: 'none' }}>
+                 {favoritos.includes(producto.id) ? 'QUITAR' : 'GUARDAR'}
+               </button>
             </div>
+        )}
+
+        {/* BOTÓN ADMIN RESTAURADO */}
+        {userRole === 'admin' && (
+          <button onClick={(e) => handleToggleVendidoAdmin(e, producto)} style={{ width: '100%', padding: '12px', marginTop: 'auto', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.2em', textTransform: 'uppercase', border: '1px solid #ffffff', backgroundColor: producto.vendido ? 'transparent' : '#ffffff', color: producto.vendido ? '#aaaaaa' : '#000000', cursor: 'pointer', outline: 'none' }}>
+            {producto.vendido ? 'Desmarcar Venta' : 'Marcar como Vendida'}
+          </button>
         )}
       </div>
     </div>
