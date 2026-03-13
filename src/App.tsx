@@ -302,7 +302,7 @@ export default function App() {
       if (errorStock) return alert('Una de las tallas seleccionadas no tiene stock disponible.');
       nuevasTallas = JSON.stringify(tallasObj);
       cantidadVendida = selectedSizes.length; 
-      const totalStockRestante = Object.values(tallasObj).reduce((acc, val) => acc + Number(val), 0);
+      const totalStockRestante = Object.values(tallasObj).reduce((acc: number, val) => acc + Number(val), 0);
       if (totalStockRestante === 0) nuevoVendido = true;
       setTallasSeleccionadas(prev => ({ ...prev, [producto.id]: [] }));
     } else {
@@ -556,9 +556,9 @@ export default function App() {
             </div>
             <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center text-center bg-black border-t md:border-t-0 md:border-l border-[#333333]">
               <h2 className="text-[14px] md:text-[16px] tracking-[0.2em] uppercase text-white mb-2">{productoSeleccionado.titulo}</h2>
-              <p className="text-[14px] tracking-[0.1em] text-white font-light mb-8">${productoSeleccionado.precio} USD</p>
+              <p style={{ fontVariantNumeric: 'tabular-nums lining-nums' }} className="text-[14px] tracking-[0.1em] text-white font-light mb-8">${productoSeleccionado.precio} USD</p>
               
-              <p style={{ color: '#ffffff', opacity: 1 }} className="text-[12px] leading-loose mb-8 uppercase tracking-[0.1em] w-full">
+              <p style={{ color: '#ffffff', opacity: 1, fontSize: '13px' }} className="leading-loose mb-8 uppercase tracking-[0.1em] w-full">
                 {productoSeleccionado.descripcion}
               </p>
             </div>

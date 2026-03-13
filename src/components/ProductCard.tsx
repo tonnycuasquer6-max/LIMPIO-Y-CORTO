@@ -1,7 +1,41 @@
 import { useState, useRef, useEffect } from 'react';
 
-export default function ProductCard({ producto, userRole, prepararEdicion, handleBorrarLocal, setProductoSeleccionado, agregarAlCarrito, toggleFavorito, favoritos, handleToggleVendidoAdmin }) {
-  const [tallasSeleccionadas, setTallasSeleccionadas] = useState([]);
+interface Product {
+  id: string | number;
+  titulo: string;
+  precio: number | string;
+  imagen_url: string;
+  descripcion?: string;
+  subcategoria?: string;
+  tallas?: string | object;
+  vendido?: boolean;
+}
+
+interface ProductCardProps {
+  key?: any;
+  producto: Product;
+  userRole: string;
+  prepararEdicion: (p: Product) => void;
+  handleBorrarLocal: (id: string | number) => void;
+  setProductoSeleccionado: (p: Product) => void;
+  agregarAlCarrito: (p: Product, e: any, tallas?: string[]) => void;
+  toggleFavorito: (id: string | number) => void;
+  favoritos: (string | number)[];
+  handleToggleVendidoAdmin: (e: any, p: Product) => void;
+}
+
+export default function ProductCard({ 
+  producto, 
+  userRole, 
+  prepararEdicion, 
+  handleBorrarLocal, 
+  setProductoSeleccionado, 
+  agregarAlCarrito, 
+  toggleFavorito, 
+  favoritos, 
+  handleToggleVendidoAdmin 
+}: ProductCardProps) {
+  const [tallasSeleccionadas, setTallasSeleccionadas] = useState<string[]>([]);
   const [imgLoaded, setImgLoaded] = useState(false);
   const imgRef = useRef(null);
 
@@ -69,7 +103,7 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
       <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, alignItems: 'center', textAlign: 'center', width: '100%' }}>
         {/* 2. TÍTULOS EN 13 PUNTOS TIMES NEW ROMAN */}
         <h4 style={{ fontSize: '13px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#ffffff', marginBottom: '8px', margin: 0 }}>{producto.titulo}</h4>
-        <span style={{ fontSize: '13px', letterSpacing: '0.1em', color: '#ffffff', fontWeight: 'lighter', marginBottom: '24px', display: 'block', marginTop: '8px' }}>${producto.precio} USD</span>
+        <span style={{ fontSize: '13px', letterSpacing: '0.1em', color: '#ffffff', fontWeight: 'lighter', marginBottom: '24px', display: 'block', marginTop: '8px', fontVariantNumeric: 'tabular-nums lining-nums' }}>${producto.precio} USD</span>
         
         {isRing && (
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginBottom: '24px', width: '100%' }}>
@@ -88,12 +122,12 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
                       minWidth: '24px', height: '24px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '12px', letterSpacing: '0.1em', border: isAvailable ? (isSelected ? '1px solid #ffffff' : '1px solid #555555') : '1px solid #333333',
                       backgroundColor: isSelected ? '#ffffff' : 'transparent', color: isAvailable ? (isSelected ? '#000000' : '#ffffff') : '#555555',
-                      cursor: isAvailable ? 'pointer' : 'not-allowed', outline: 'none', transition: 'all 0.3s'
+                      cursor: isAvailable ? 'pointer' : 'not-allowed', outline: 'none', transition: 'all 0.3s', fontVariantNumeric: 'tabular-nums lining-nums'
                     }}
                   >
                     {talla}
                   </button>
-                  <span style={{ fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: isAvailable ? '#aaaaaa' : '#555555' }}>
+                  <span style={{ fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: isAvailable ? '#aaaaaa' : '#555555', fontVariantNumeric: 'tabular-nums lining-nums' }}>
                     {stock === 0 ? '0' : stock}
                   </span>
                 </div>
@@ -102,8 +136,8 @@ export default function ProductCard({ producto, userRole, prepararEdicion, handl
           </div>
         )}
         
-        {/* 4. DESCRIPCIÓN COLOR BLANCO Y 12 PUNTOS FORZADO */}
-        <p style={{ color: '#ffffff', fontSize: '12px', lineHeight: '1.8', marginBottom: '24px', textTransform: 'uppercase', width: '100%', margin: 0, opacity: 1 }}>
+        {/* 4. DESCRIPCIÓN COLOR BLANCO Y 13 PUNTOS FORZADO (UN PUNTO MÁS GRANDE) */}
+        <p style={{ color: '#ffffff', fontSize: '13px', lineHeight: '1.8', marginBottom: '24px', textTransform: 'uppercase', width: '100%', margin: 0, opacity: 1 }}>
           {producto.descripcion}
         </p>
 
